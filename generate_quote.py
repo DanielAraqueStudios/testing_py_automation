@@ -540,6 +540,300 @@ def get_user_input():
 def format_price(price):
     return "{:,.0f}".format(price).replace(",", ".")
 
+def get_variables_from_data(data):
+    """Convert GUI data format to backend variables format"""
+    services = data['services']
+    prices = data['prices']
+    
+    variables = {
+        'client_names': data['client_names'],
+        'client_position': data['client_position'],
+        'company_name': data['company_name'],
+        'sender_name': data['sender_name'],
+        'sender_position': data['sender_position'],
+        'validity_days': data['validity_days'],
+        'payment_terms': data['payment_terms'],
+        
+        # Add service text variables
+        'web_service': 'Desarrollo web, ' if services['web'] else '',
+        'bot_service': 'bot de whatsapp, ' if services['bot'] else '',
+        'facebook_service': 'campañas de tráfico pago, ' if services['facebook'] else '',
+        'social_service': 'estrategia en redes sociales' if services['social'] else '',
+        'ai_service': ' y capacitación en inteligencia artificial' if services['ai'] else '',
+        
+        # Add service flags
+        'show_web': 'true' if services['web'] else 'false',
+        'show_social': 'true' if services['social'] else 'false',
+        'show_bot': 'true' if services['bot'] else 'false',
+        'show_facebook': 'true' if services['facebook'] else 'false',
+        'show_ai': 'true' if services['ai'] else 'false',
+        
+        # Add service section content (using the same logic as get_user_input)
+        'web_section': '''
+      <section class="section" id="testimonials">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <div class="center-heading">
+                <h2>PÁGINA <em>
+                  WEB
+                </em>
+                <p>Características de la página
+                </p>
+              </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section" id="about">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+                    data-scroll-reveal="enter left move 30px over 0.6s after 0.4s">
+                    <div class="features-item">
+                        <div class="features-icon">
+                            <h2>01</h2>
+                            <img src="assets/images/features-icon-1.png" alt="">
+                            <h4>A medida</h4>
+                            <p>Desarrollo completamente a medida, con subpáginas, menús desplegables, botón de WhatsApp y de redes sociales. Tanto los botones, colores, tipografía y en general toda la página.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+                    data-scroll-reveal="enter bottom move 30px over 0.6s after 0.4s">
+                    <div class="features-item">
+                        <div class="features-icon">
+                            <h2>02</h2>
+                            <img src="assets/images/features-icon-2.png" alt="">
+                            <h4>Tecnologías</h4>
+                            <p>Desarrollo de eccomerce con carrito de compras , diseño responsive que se adapta a diferentes dispositivos (iPad, tablets, computadores, televisores y dispositivos móviles).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+                    data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+                    <div class="features-item">
+                        <div class="features-icon">
+                            <h2>03</h2>
+                            <img src="assets/images/features-icon-3.png" alt="">
+                            <h4>Posicionamiento SEO</h4>
+                            <p>Posicionamiento orgánico, tu página aparece de primera en Google  en los primeros lugares de búsqueda al colocar el nombre de la empresa.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+                    data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+                    <div class="features-item">
+                        <div class="features-icon">
+                            <h2>04</h2>
+                            <img src="assets/images/features-icon-3.png" alt="">
+                            <h4>UI/UX + mapas de calor</h4>
+                            <p>Tú página tendrá una tecnología basada en mapas de calor, donde por medio del diseño minimalista se predice estadísticamente los lugares en que se posicionará el mouse para colocar los botones y llamadas a la acción en dichos lugares.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+                    data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+                    <div class="features-item">
+                        <div class="features-icon">
+                            <h2>05</h2>
+                            <img src="assets/images/features-icon-3.png" alt="">
+                            <h4>Carrito de compras</h4>
+                            <p>Permite agregar productos al carrito de compras y procesar los pagos online ,pagar con difeentes medios de pago.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+                    data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+                    <div class="features-item">
+                        <div class="features-icon">
+                            <h2>06</h2>
+                            <img src="assets/images/features-icon-3.png" alt="">
+                            <h4>Cuentas de correo</h4>
+                            <p>Se incluyen hasta 10 cuentas de correo electrónico (depende del nombre del hosting). Ej: nombre del hosting: nextcompany.com, correo: gerencia@nexthosting.com.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+        ''' if services['web'] else '',
+        'social_section': '''       <section class="section" id="testimonials">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <div class="center-heading">
+                <h2>REDES <em>
+                    SOCIALES
+                  </em>
+                  <p>Características de las redes
+                  </p>
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter left move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>01</h2>
+                  <img src="assets/images/features-icon-1.png" alt="">
+                  <h4>Estrategia basada en investigación de mercado</h4>
+                  <p>Con la investigación de mercado realizada, obtendrás una estrategia de contenido personalizada
+                    para tu audiencia específica.</p>
+
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter bottom move 30px over 0.6s after 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>02</h2>
+                  <img src="assets/images/features-icon-2.png" alt="">
+                  <h4>Crecimiento exponencial garantizado</h4>
+                  <p>Aprovecha la programación inteligente a través de Facebook Business Suite para conocer las mejores
+                    horas de conexión de tus usuarios.</p>
+
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>03</h2>
+                  <img src="assets/images/features-icon-3.png" alt="">
+                  <h4>Hashtags virales y alcance masivo</h4>
+                  <p>Nuestro análisis de tendencias y uso estratégico de hashtags virales te ayudarán a alcanzar el mayor potencial en tu estrategia de redes sociales.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>''' if services['social'] else '',
+        'bot_section': '''       <section class="section" id="testimonials">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <div class="center-heading">
+                <h2>BOT DE <em>
+                    WHASTSAPP
+                  </em>
+                  <p>Características deL BOT
+                  </p>
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter left move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>01</h2>
+                  <img src="assets/images/features-icon-1.png" alt="">
+                  <h4>Atención ininterrumpida.</h4>
+                  <p>El Bot de WhatsApp está disponible las 24 horas del día, los 7 días de la semana.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter bottom move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>02</h2>
+                  <img src="assets/images/features-icon-2.png" alt="">
+                  <h4>Eficiencia y precisión.</h4>
+                  <p>Gracias al uso de Machine Learning, el Bot puede predecir las preguntas y necesidades.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>03</h2>
+                  <img src="assets/images/features-icon-3.png" alt="">
+                  <h4>Modelo conversacional avanzado.</h4>
+                  <p>El Bot utiliza un modelo conversacional programable y personalizable.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>''' if services['bot'] else '',
+        'facebook_section': '' if not services['facebook'] else '',
+        'ai_section': '' if not services['ai'] else '',
+        
+        # Add pricing section content
+        'web_pricing': f'''
+                <h3>Página web eccomerce</h3><br>
+                <s>${format_price(prices.get('web_original', 0))}</s><br>
+                ${format_price(prices.get('web_discounted', 0))} ÚNICO PAGO (10% descuento)<br>{data['payment_terms']}<br>
+                <br>
+        ''' if services['web'] else '',
+        
+        'social_pricing': f'''
+                <h3>Redes Sociales</h3><br>
+                <s>${format_price(prices.get('social_original', 0))}</s><br>
+                ${format_price(prices.get('social_discounted', 0))} VALOR MENSUAL (10% descuento)<br>{data['payment_terms']}<br>
+                <br>
+        ''' if services['social'] else '',
+        
+        'bot_pricing': f'''
+                <h3>Bot de whatsapp</h3><br>
+                <s>${format_price(prices.get('bot_original', 0))}</s><br>
+                ${format_price(prices.get('bot_discounted', 0))} VALOR ANUAL (10% descuento)<br>{data['payment_terms']}<br>
+                <br>
+        ''' if services['bot'] else '',
+        
+        'facebook_pricing': f'''
+                <h3>Campañas de tráfico pago para Facebook</h3><br>
+                <s>${format_price(prices.get('facebook_original', 0))}</s><br>
+                ${format_price(prices.get('facebook_discounted', 0))} VALOR MENSUAL (10% descuento)<br>{data['payment_terms']}<br>
+                <br>
+        ''' if services['facebook'] else '',
+        
+        'ai_pricing': f'''
+                <h3>Capacitación en herramientas de inteligencia artificial</h3><br>
+                <s>${format_price(prices.get('ai_original', 0))}</s><br>
+                ${format_price(prices.get('ai_discounted', 0))} ÚNICO PAGO (10% descuento)<br>{data['payment_terms']}<br>
+                <br>
+                ✅ Dominio práctico de ChatGPT, GPTs personalizados y uso efectivo de plugins<br>
+                ✅ Creación de presentaciones profesionales con Gamma.app y herramientas IA complementarias<br>
+                ✅ Casos prácticos orientados a los procesos de la empresa<br>
+                ✅ Material de apoyo y grabaciones<br>
+                ✅ Resolución de dudas en tiempo real<br>
+                ✅ Recomendaciones específicas para maximizar el retorno de inversión en IA<br>
+        ''' if services['ai'] else '',
+    }
+
+    # Initialize all price variables (so template has keys)
+    price_keys = ['web_original','web_discounted','social_original','social_discounted',
+                  'bot_original','bot_discounted','facebook_original','facebook_discounted',
+                  'ai_original','ai_discounted']
+    for k in price_keys:
+        variables[k] = format_price(0)
+    
+    # Add prices only for selected services (overwrite defaults)
+    for service, price_data in prices.items():
+        variables[service] = format_price(price_data)
+
+    return variables
+
 def remove_duplicate_footer(html: str) -> str:
     """Keep first <footer id="contact-us">...</footer>, remove subsequent ones,
     then trim content after the first </html> (if extras were appended)."""
