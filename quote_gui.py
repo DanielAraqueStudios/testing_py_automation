@@ -63,12 +63,14 @@ class PriceInputWidget(QWidget):
         
         # Original price
         self.original_input = QLineEdit()
-        self.original_input.setPlaceholderText("Precio original")
+        self.original_input.setPlaceholderText("Precio original (ej: 5000000)")
+        self.original_input.setMaxLength(25)  # Allow up to 25 characters including dots
         self.original_input.textChanged.connect(self.validate_price)
         
         # Discounted price
         self.discounted_input = QLineEdit()
-        self.discounted_input.setPlaceholderText("Precio con descuento")
+        self.discounted_input.setPlaceholderText("Precio con descuento (ej: 4500000)")
+        self.discounted_input.setMaxLength(25)  # Allow up to 25 characters including dots
         self.discounted_input.textChanged.connect(self.validate_price)
         
         layout.addWidget(QLabel("Original:"))
@@ -78,36 +80,76 @@ class PriceInputWidget(QWidget):
     
     def validate_price(self):
         sender = self.sender()
+        if not isinstance(sender, QLineEdit):
+            return
         text = sender.text()
         
-        # Remove invalid characters and normalize
+        # Allow up to 20 digits - remove all non-numeric characters except dots and commas
         cleaned = re.sub(r'[^\d,.-]', '', text)
         
+        # Handle different decimal separator formats
         if ',' in cleaned and '.' in cleaned:
+            # Format: 1,234,567.89 - remove commas (thousand separators)
             cleaned = cleaned.replace(',', '')
         elif ',' in cleaned and '.' not in cleaned:
+            # Format: 1,89 - treat comma as decimal separator
             cleaned = cleaned.replace(',', '.')
         else:
+            # Remove any remaining commas
             cleaned = cleaned.replace(',', '')
         
-        # Format for display
+        # Remove multiple dots (keep only the first one)
+        parts = cleaned.split('.')
+        if len(parts) > 2:
+            cleaned = parts[0] + '.' + ''.join(parts[1:])
+        
+        # Limit to 20 digits maximum (before decimal point)
+        if '.' in cleaned:
+            integer_part, decimal_part = cleaned.split('.', 1)
+            if len(integer_part) > 20:
+                integer_part = integer_part[:20]
+            cleaned = integer_part + '.' + decimal_part
+        else:
+            if len(cleaned) > 20:
+                cleaned = cleaned[:20]
+        
+        # Format for display (only if it's a valid number)
         try:
-            if cleaned and cleaned != '.':
+            if cleaned and cleaned != '.' and cleaned != '':
+                # Check if it's a valid number first
                 value = float(cleaned)
-                formatted = "{:,.0f}".format(value).replace(",", ".")
+                # Format with dots as thousand separators (Colombian format)
+                if value >= 1000:
+                    formatted = "{:,.0f}".format(value).replace(",", ".")
+                else:
+                    formatted = str(int(value))
+                
+                # Only update if the formatted version is different
                 if sender.text() != formatted:
+                    cursor_pos = sender.cursorPosition()
                     sender.blockSignals(True)
                     sender.setText(formatted)
+                    # Try to maintain cursor position
+                    sender.setCursorPosition(min(cursor_pos, len(formatted)))
                     sender.blockSignals(False)
-        except ValueError:
+        except (ValueError, OverflowError):
+            # If it's not a valid number, just allow the input as-is for now
             pass
     
     def get_prices(self):
         try:
-            original = float(self.original_input.text().replace('.', '').replace(',', '.'))
-            discounted = float(self.discounted_input.text().replace('.', '').replace(',', '.'))
+            # Remove dots (thousand separators) and convert to float
+            original_text = self.original_input.text().replace('.', '')
+            discounted_text = self.discounted_input.text().replace('.', '')
+            
+            # Handle empty fields
+            if not original_text.strip() or not discounted_text.strip():
+                return None, None
+            
+            original = float(original_text)
+            discounted = float(discounted_text)
             return original, discounted
-        except ValueError:
+        except (ValueError, OverflowError):
             return None, None
     
     def set_enabled(self, enabled):
