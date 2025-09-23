@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QGridLayout, QFormLayout, QLabel, 
                              QLineEdit, QCheckBox, QPushButton, QTextEdit, 
                              QScrollArea, QFrame, QSpacerItem, QSizePolicy,
-                             QMessageBox, QProgressBar, QTabWidget)
+                             QMessageBox, QProgressBar, QTabWidget, QSpinBox)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont, QPixmap, QPalette, QColor, QIcon
 from string import Template
@@ -58,103 +58,132 @@ class PriceInputWidget(QWidget):
         self.setup_ui()
     
     def setup_ui(self):
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        # Main vertical layout
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(10)
         
-        # Original price
-        self.original_input = QLineEdit()
-        self.original_input.setPlaceholderText("Precio original (ej: 5000000)")
-        self.original_input.setMaxLength(25)  # Allow up to 25 characters including dots
-        self.original_input.textChanged.connect(self.validate_price)
+        # First row: Final price and discount percentage
+        input_row = QHBoxLayout()
         
-        # Discounted price
-        self.discounted_input = QLineEdit()
-        self.discounted_input.setPlaceholderText("Precio con descuento (ej: 4500000)")
-        self.discounted_input.setMaxLength(25)  # Allow up to 25 characters including dots
-        self.discounted_input.textChanged.connect(self.validate_price)
+        # Final price (what customer pays)
+        self.final_price_input = QLineEdit()
+        self.final_price_input.setPlaceholderText("Precio final (ej: 4500000)")
+        self.final_price_input.setMaxLength(30)
+        self.final_price_input.editingFinished.connect(self.calculate_original_price)
         
-        layout.addWidget(QLabel("Original:"))
-        layout.addWidget(self.original_input)
-        layout.addWidget(QLabel("Descuento:"))
-        layout.addWidget(self.discounted_input)
+        # Discount percentage selector
+        self.discount_spin = QSpinBox()
+        self.discount_spin.setRange(0, 99)
+        self.discount_spin.setValue(10)  # Default 10%
+        self.discount_spin.setSuffix("%")
+        self.discount_spin.setStyleSheet("""
+            QSpinBox {
+                background-color: #0E0F19;
+                color: #EFE9E7;
+                border: 2px solid #6622CC;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            QSpinBox::up-button, QSpinBox::down-button {
+                background-color: #6622CC;
+                border: none;
+                width: 20px;
+            }
+            QSpinBox::up-arrow, QSpinBox::down-arrow {
+                width: 10px;
+                height: 10px;
+            }
+        """)
+        self.discount_spin.valueChanged.connect(self.calculate_original_price)
+        
+        input_row.addWidget(QLabel("Precio Final:"))
+        input_row.addWidget(self.final_price_input, 2)
+        input_row.addWidget(QLabel("Descuento:"))
+        input_row.addWidget(self.discount_spin, 1)
+        
+        # Second row: Calculated original price (read-only)
+        calc_row = QHBoxLayout()
+        
+        self.original_price_display = QLineEdit()
+        self.original_price_display.setPlaceholderText("Precio original (calculado automáticamente)")
+        self.original_price_display.setReadOnly(True)
+        self.original_price_display.setStyleSheet("""
+            QLineEdit:read-only {
+                background-color: #0E0F19;
+                color: #EFE9E7;
+                border: 2px solid #6622CC;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-style: italic;
+                opacity: 0.8;
+            }
+        """)
+        
+        calc_row.addWidget(QLabel("Precio Original:"))
+        calc_row.addWidget(self.original_price_display)
+        
+        main_layout.addLayout(input_row)
+        main_layout.addLayout(calc_row)
     
-    def validate_price(self):
-        sender = self.sender()
-        if not isinstance(sender, QLineEdit):
-            return
-        text = sender.text()
-        
-        # Allow up to 20 digits - remove all non-numeric characters except dots and commas
-        cleaned = re.sub(r'[^\d,.-]', '', text)
-        
-        # Handle different decimal separator formats
-        if ',' in cleaned and '.' in cleaned:
-            # Format: 1,234,567.89 - remove commas (thousand separators)
-            cleaned = cleaned.replace(',', '')
-        elif ',' in cleaned and '.' not in cleaned:
-            # Format: 1,89 - treat comma as decimal separator
-            cleaned = cleaned.replace(',', '.')
-        else:
-            # Remove any remaining commas
-            cleaned = cleaned.replace(',', '')
-        
-        # Remove multiple dots (keep only the first one)
-        parts = cleaned.split('.')
-        if len(parts) > 2:
-            cleaned = parts[0] + '.' + ''.join(parts[1:])
-        
-        # Limit to 20 digits maximum (before decimal point)
-        if '.' in cleaned:
-            integer_part, decimal_part = cleaned.split('.', 1)
-            if len(integer_part) > 20:
-                integer_part = integer_part[:20]
-            cleaned = integer_part + '.' + decimal_part
-        else:
-            if len(cleaned) > 20:
-                cleaned = cleaned[:20]
-        
-        # Format for display (only if it's a valid number)
+    def calculate_original_price(self):
         try:
-            if cleaned and cleaned != '.' and cleaned != '':
-                # Check if it's a valid number first
-                value = float(cleaned)
-                # Format with dots as thousand separators (Colombian format)
-                if value >= 1000:
-                    formatted = "{:,.0f}".format(value).replace(",", ".")
-                else:
-                    formatted = str(int(value))
+            # Get final price
+            final_text = self.final_price_input.text().replace('.', '').replace(',', '').strip()
+            if not final_text:
+                self.original_price_display.clear()
+                return
+            
+            final_price = float(final_text)
+            discount_percent = self.discount_spin.value()
+            
+            if discount_percent == 0:
+                # No discount, original = final
+                original_price = final_price
+            else:
+                # Calculate original price: final_price / (1 - discount/100)
+                discount_multiplier = 1 - (discount_percent / 100)
+                original_price = final_price / discount_multiplier
+            
+            # Format and display the calculated original price
+            formatted_original = "{:,.0f}".format(original_price).replace(",", ".")
+            self.original_price_display.setText(formatted_original)
+            
+            # Format the final price input if needed
+            formatted_final = "{:,.0f}".format(final_price).replace(",", ".")
+            if self.final_price_input.text() != formatted_final:
+                self.final_price_input.blockSignals(True)
+                self.final_price_input.setText(formatted_final)
+                self.final_price_input.blockSignals(False)
                 
-                # Only update if the formatted version is different
-                if sender.text() != formatted:
-                    cursor_pos = sender.cursorPosition()
-                    sender.blockSignals(True)
-                    sender.setText(formatted)
-                    # Try to maintain cursor position
-                    sender.setCursorPosition(min(cursor_pos, len(formatted)))
-                    sender.blockSignals(False)
-        except (ValueError, OverflowError):
-            # If it's not a valid number, just allow the input as-is for now
-            pass
+        except (ValueError, ZeroDivisionError):
+            self.original_price_display.clear()
     
     def get_prices(self):
         try:
-            # Remove dots (thousand separators) and convert to float
-            original_text = self.original_input.text().replace('.', '')
-            discounted_text = self.discounted_input.text().replace('.', '')
+            # Get original price (calculated)
+            original_text = self.original_price_display.text().replace('.', '').replace(',', '').strip()
+            # Get final price (user input)
+            final_text = self.final_price_input.text().replace('.', '').replace(',', '').strip()
             
-            # Handle empty fields
-            if not original_text.strip() or not discounted_text.strip():
+            if not original_text or not final_text:
                 return None, None
             
             original = float(original_text)
-            discounted = float(discounted_text)
-            return original, discounted
+            final = float(final_text)
+            
+            return original, final
         except (ValueError, OverflowError):
             return None, None
     
+    def get_discount_percentage(self):
+        return self.discount_spin.value()
+    
     def set_enabled(self, enabled):
-        self.original_input.setEnabled(enabled)
-        self.discounted_input.setEnabled(enabled)
+        self.final_price_input.setEnabled(enabled)
+        self.discount_spin.setEnabled(enabled)
+        # Original price display is always read-only
 
 class ModernQuoteApp(QMainWindow):
     def __init__(self):
@@ -162,8 +191,9 @@ class ModernQuoteApp(QMainWindow):
         # Initialize dictionaries first
         self.services = {}
         self.price_widgets = {}
+        self.is_dark_mode = True  # Start with dark mode
         self.setup_ui()
-        self.apply_dark_theme()
+        self.apply_theme()
         
     def setup_ui(self):
         self.setWindowTitle("Sistema de Cotizaciones - Moderno")
@@ -190,20 +220,15 @@ class ModernQuoteApp(QMainWindow):
     def create_header(self, parent_layout):
         header = QFrame()
         header.setFixedHeight(80)
-        header.setStyleSheet("""
-            QFrame {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #2c3e50, stop:1 #3498db);
-                border: none;
-            }
-        """)
+        self.header = header  # Store reference for theme updates
+        self.update_header_style()
         
         header_layout = QHBoxLayout(header)
         
         title_label = QLabel("Sistema de Cotizaciones")
         title_label.setStyleSheet("""
             QLabel {
-                color: white;
+                color: #EFE9E7;
                 font-size: 24px;
                 font-weight: bold;
                 background: transparent;
@@ -213,7 +238,7 @@ class ModernQuoteApp(QMainWindow):
         subtitle_label = QLabel("Generador profesional de propuestas")
         subtitle_label.setStyleSheet("""
             QLabel {
-                color: #ecf0f1;
+                color: #EFE9E7;
                 font-size: 14px;
                 background: transparent;
             }
@@ -228,29 +253,54 @@ class ModernQuoteApp(QMainWindow):
         header_layout.addWidget(title_container)
         header_layout.addStretch()
         
+        # Add theme toggle button
+        self.theme_toggle_btn = QPushButton("🌙 Dark")
+        self.theme_toggle_btn.setFixedSize(100, 40)
+        self.theme_toggle_btn.clicked.connect(self.toggle_theme)
+        self.theme_toggle_btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.5);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        """)
+        
+        header_layout.addWidget(self.theme_toggle_btn)
+        
         parent_layout.addWidget(header)
     
     def create_content_tabs(self, parent_layout):
         self.tab_widget = QTabWidget()
         self.tab_widget.setStyleSheet("""
             QTabWidget::pane {
-                border: 1px solid #34495e;
-                background-color: #2c3e50;
+                border: 1px solid #6622CC;
+                background-color: #0E0F19;
             }
             QTabBar::tab {
-                background-color: #34495e;
-                color: #ecf0f1;
+                background-color: #0E0F19;
+                color: #EFE9E7;
                 padding: 12px 20px;
                 margin-right: 2px;
                 border-top-left-radius: 8px;
                 border-top-right-radius: 8px;
             }
             QTabBar::tab:selected {
-                background-color: #3498db;
-                color: white;
+                background-color: #6622CC;
+                color: #EFE9E7;
             }
             QTabBar::tab:hover {
-                background-color: #4a6741;
+                background-color: #6622CC;
+                opacity: 0.8;
             }
         """)
         
@@ -402,8 +452,8 @@ class ModernQuoteApp(QMainWindow):
         group = QFrame()
         group.setStyleSheet("""
             QFrame {
-                background-color: #34495e;
-                border: 1px solid #4a6741;
+                background-color: #0E0F19;
+                border: 1px solid #6622CC;
                 border-radius: 10px;
                 padding: 15px;
             }
@@ -416,7 +466,7 @@ class ModernQuoteApp(QMainWindow):
         title_label = QLabel(title)
         title_label.setStyleSheet("""
             QLabel {
-                color: #3498db;
+                color: #6622CC;
                 font-size: 16px;
                 font-weight: bold;
                 background: transparent;
@@ -441,15 +491,16 @@ class ModernQuoteApp(QMainWindow):
         container = QFrame()
         container.setStyleSheet("""
             QFrame {
-                background-color: #2c3e50;
-                border: 1px solid #34495e;
+                background-color: #0E0F19;
+                border: 1px solid #6622CC;
                 border-radius: 8px;
                 padding: 15px;
                 margin: 5px 0px;
             }
             QFrame:hover {
-                border-color: #3498db;
-                background-color: #34495e;
+                border-color: #6622CC;
+                background-color: #6622CC;
+                opacity: 0.1;
             }
         """)
         
@@ -458,7 +509,7 @@ class ModernQuoteApp(QMainWindow):
         checkbox = QCheckBox(title)
         checkbox.setStyleSheet("""
             QCheckBox {
-                color: #ecf0f1;
+                color: #EFE9E7;
                 font-size: 14px;
                 font-weight: bold;
                 spacing: 10px;
@@ -468,23 +519,24 @@ class ModernQuoteApp(QMainWindow):
                 height: 20px;
             }
             QCheckBox::indicator:unchecked {
-                border: 2px solid #7f8c8d;
+                border: 2px solid #EFE9E7;
                 border-radius: 4px;
                 background-color: transparent;
             }
             QCheckBox::indicator:checked {
-                border: 2px solid #3498db;
+                border: 2px solid #6622CC;
                 border-radius: 4px;
-                background-color: #3498db;
+                background-color: #6622CC;
             }
         """)
         
         desc_label = QLabel(description)
         desc_label.setStyleSheet("""
             QLabel {
-                color: #bdc3c7;
+                color: #EFE9E7;
                 font-size: 12px;
                 background: transparent;
+                opacity: 0.8;
             }
         """)
         desc_label.setWordWrap(True)
@@ -506,8 +558,8 @@ class ModernQuoteApp(QMainWindow):
         container = QFrame()
         container.setStyleSheet("""
             QFrame {
-                background-color: #2c3e50;
-                border: 1px solid #34495e;
+                background-color: #0E0F19;
+                border: 1px solid #6622CC;
                 border-radius: 8px;
                 padding: 15px;
                 margin: 5px 0px;
@@ -519,7 +571,7 @@ class ModernQuoteApp(QMainWindow):
         title_label = QLabel(title)
         title_label.setStyleSheet("""
             QLabel {
-                color: #ecf0f1;
+                color: #EFE9E7;
                 font-size: 14px;
                 font-weight: bold;
                 margin-bottom: 10px;
@@ -545,8 +597,8 @@ class ModernQuoteApp(QMainWindow):
         footer.setFixedHeight(80)
         footer.setStyleSheet("""
             QFrame {
-                background-color: #34495e;
-                border-top: 1px solid #4a6741;
+                background-color: #0E0F19;
+                border-top: 1px solid #6622CC;
             }
         """)
         
@@ -558,14 +610,14 @@ class ModernQuoteApp(QMainWindow):
         self.progress_bar.setVisible(False)
         self.progress_bar.setStyleSheet("""
             QProgressBar {
-                border: 2px solid #34495e;
+                border: 2px solid #6622CC;
                 border-radius: 8px;
                 text-align: center;
-                color: white;
-                background-color: #2c3e50;
+                color: #EFE9E7;
+                background-color: #0E0F19;
             }
             QProgressBar::chunk {
-                background-color: #3498db;
+                background-color: #6622CC;
                 border-radius: 6px;
             }
         """)
@@ -580,8 +632,8 @@ class ModernQuoteApp(QMainWindow):
         # Button styling
         button_style = """
             QPushButton {
-                background-color: #3498db;
-                color: white;
+                background-color: #6622CC;
+                color: #EFE9E7;
                 border: none;
                 padding: 12px 24px;
                 border-radius: 8px;
@@ -590,19 +642,22 @@ class ModernQuoteApp(QMainWindow):
                 min-width: 150px;
             }
             QPushButton:hover {
-                background-color: #2980b9;
+                background-color: #6622CC;
+                opacity: 0.8;
             }
             QPushButton:pressed {
-                background-color: #21618c;
+                background-color: #6622CC;
+                opacity: 0.6;
             }
             QPushButton:disabled {
-                background-color: #7f8c8d;
-                color: #bdc3c7;
+                background-color: #0E0F19;
+                color: #EFE9E7;
+                opacity: 0.5;
             }
         """
         
         self.generate_btn.setStyleSheet(button_style)
-        self.preview_btn.setStyleSheet(button_style.replace("#3498db", "#27ae60").replace("#2980b9", "#229954").replace("#21618c", "#196f3d"))
+        self.preview_btn.setStyleSheet(button_style)
         
         footer_layout.addWidget(self.progress_bar)
         footer_layout.addStretch()
@@ -611,61 +666,219 @@ class ModernQuoteApp(QMainWindow):
         
         parent_layout.addWidget(footer)
     
+    def toggle_theme(self):
+        """Toggle between dark and light mode"""
+        self.is_dark_mode = not self.is_dark_mode
+        self.apply_theme()
+        self.update_header_style()
+        
+        # Update button text and icon
+        if self.is_dark_mode:
+            self.theme_toggle_btn.setText("🌙 Dark")
+        else:
+            self.theme_toggle_btn.setText("☀️ Light")
+    
+    def update_header_style(self):
+        """Update header style based on current theme"""
+        if self.is_dark_mode:
+            header_style = """
+                QFrame {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                        stop:0 #6622CC, stop:1 #6622CC);
+                    border: none;
+                }
+            """
+        else:
+            header_style = """
+                QFrame {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                        stop:0 #6622CC, stop:1 #6622CC);
+                    border: none;
+                }
+            """
+        self.header.setStyleSheet(header_style)
+    
+    def apply_theme(self):
+        """Apply the current theme (dark or light)"""
+        if self.is_dark_mode:
+            self.apply_dark_theme()
+        else:
+            self.apply_light_theme()
+    
     def apply_dark_theme(self):
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #2c3e50;
-                color: #ecf0f1;
+                background-color: #0E0F19;
+                color: #EFE9E7;
             }
             QWidget {
-                background-color: #2c3e50;
-                color: #ecf0f1;
+                background-color: #0E0F19;
+                color: #EFE9E7;
             }
             QLineEdit {
-                background-color: #34495e;
-                border: 2px solid #4a6741;
+                background-color: #0E0F19;
+                border: 2px solid #6622CC;
                 border-radius: 6px;
                 padding: 8px 12px;
                 font-size: 14px;
-                color: #ecf0f1;
+                color: #EFE9E7;
             }
             QLineEdit:focus {
-                border-color: #3498db;
+                border-color: #6622CC;
+                background-color: #0E0F19;
             }
             QLineEdit:disabled {
-                background-color: #2c3e50;
-                color: #7f8c8d;
-                border-color: #34495e;
+                background-color: #0E0F19;
+                color: #EFE9E7;
+                border-color: #6622CC;
+                opacity: 0.5;
             }
             QTextEdit {
-                background-color: #34495e;
-                border: 2px solid #4a6741;
+                background-color: #0E0F19;
+                border: 2px solid #6622CC;
                 border-radius: 6px;
                 padding: 8px;
-                color: #ecf0f1;
+                color: #EFE9E7;
             }
             QLabel {
-                color: #ecf0f1;
+                color: #EFE9E7;
                 background: transparent;
             }
             QScrollArea {
                 border: none;
-                background-color: #2c3e50;
+                background-color: #0E0F19;
             }
             QScrollBar:vertical {
-                background-color: #34495e;
+                background-color: #0E0F19;
                 width: 12px;
                 border-radius: 6px;
             }
             QScrollBar::handle:vertical {
-                background-color: #4a6741;
+                background-color: #6622CC;
                 border-radius: 6px;
                 min-height: 20px;
             }
             QScrollBar::handle:vertical:hover {
-                background-color: #3498db;
+                background-color: #6622CC;
+                opacity: 0.8;
             }
         """)
+    
+    def apply_light_theme(self):
+        """Apply light theme with the custom color palette"""
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #EFE9E7;
+                color: #0E0F19;
+            }
+            QWidget {
+                background-color: #EFE9E7;
+                color: #0E0F19;
+            }
+            QLineEdit {
+                background-color: white;
+                border: 2px solid #6622CC;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 14px;
+                color: #0E0F19;
+            }
+            QLineEdit:focus {
+                border-color: #6622CC;
+                background-color: #f8f8f8;
+            }
+            QLineEdit:disabled {
+                background-color: #f0f0f0;
+                color: #888;
+                border-color: #ccc;
+                opacity: 0.7;
+            }
+            QTextEdit {
+                background-color: white;
+                border: 2px solid #6622CC;
+                border-radius: 6px;
+                padding: 8px;
+                color: #0E0F19;
+            }
+            QLabel {
+                color: #0E0F19;
+                background: transparent;
+            }
+            QScrollArea {
+                border: none;
+                background-color: #EFE9E7;
+            }
+            QScrollBar:vertical {
+                background-color: #EFE9E7;
+                width: 12px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #6622CC;
+                border-radius: 6px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #6622CC;
+                opacity: 0.8;
+            }
+        """)
+        
+        # Update frames and containers for light mode
+        self.update_component_styles_light()
+    
+    def update_component_styles_light(self):
+        """Update individual component styles for light mode"""
+        # Update buttons
+        if hasattr(self, 'generate_btn'):
+            button_style = """
+                QPushButton {
+                    background-color: #6622CC;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    min-width: 150px;
+                }
+                QPushButton:hover {
+                    background-color: #5a1fb3;
+                }
+                QPushButton:pressed {
+                    background-color: #4f1c9e;
+                }
+                QPushButton:disabled {
+                    background-color: #ccc;
+                    color: #888;
+                }
+            """
+            self.generate_btn.setStyleSheet(button_style)
+            
+        if hasattr(self, 'preview_btn'):
+            preview_style = """
+                QPushButton {
+                    background-color: #6622CC;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    min-width: 150px;
+                }
+                QPushButton:hover {
+                    background-color: #5a1fb3;
+                }
+                QPushButton:pressed {
+                    background-color: #4f1c9e;
+                }
+                QPushButton:disabled {
+                    background-color: #ccc;
+                    color: #888;
+                }
+            """
+            self.preview_btn.setStyleSheet(preview_style)
     
     def validate_inputs(self):
         errors = []
