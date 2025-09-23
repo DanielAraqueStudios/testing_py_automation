@@ -22,7 +22,7 @@ class QuoteGenerator(QThread):
     def run(self):
         try:
             # Import the backend functions
-            from generate_quote import get_variables_from_data, generate_html, format_price
+            from generate_quote import get_variables_from_data, generate_client_folder_structure
             
             self.progress_updated.emit(25)
             
@@ -31,22 +31,26 @@ class QuoteGenerator(QThread):
             
             self.progress_updated.emit(50)
             
-            # Use the existing backend generation logic
+            # Use the new client folder structure generation
             current_dir = os.path.dirname(os.path.abspath(__file__))
             template_path = os.path.join(current_dir, 'template.html')
-            output_path = os.path.join(current_dir, 'cotizacion_generada.html')
+            
+            # Get client name for folder
+            client_name = self.data.get('company_name', self.data.get('client_names', 'Cliente'))
             
             self.progress_updated.emit(75)
             
-            # Generate using the original backend function
-            success = generate_html(template_path, output_path, variables)
+            # Generate client folder structure
+            client_folder, index_path = generate_client_folder_structure(template_path, client_name, variables)
             
             self.progress_updated.emit(100)
             
-            if success:
-                self.finished.emit(output_path)
+            if client_folder and index_path:
+                # Return both the client folder and index path
+                result_info = f"Client Folder: {client_folder}\nIndex File: {index_path}\nUpload Folder: {os.path.join(client_folder, 'to_upload')}"
+                self.finished.emit(result_info)
             else:
-                self.error_occurred.emit("Error generating HTML file")
+                self.error_occurred.emit("Error creating client folder structure")
             
         except Exception as e:
             self.error_occurred.emit(str(e))
@@ -963,15 +967,27 @@ class ModernQuoteApp(QMainWindow):
         self.generator_thread.error_occurred.connect(self.on_generation_error)
         self.generator_thread.start()
     
-    def on_generation_finished(self, output_path):
+    def on_generation_finished(self, result_info):
         self.progress_bar.setVisible(False)
         self.generate_btn.setEnabled(True)
         
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Icon.Information)
-        msg.setWindowTitle("¡Éxito!")
-        msg.setText("Cotización generada exitosamente")
-        msg.setInformativeText(f"Archivo guardado en:\n{output_path}")
+        msg.setWindowTitle("✅ ¡Cotización Generada Exitosamente!")
+        msg.setText("📁 Estructura de carpetas creada correctamente")
+        
+        # Parse the result info
+        lines = result_info.split('\n')
+        info_text = ""
+        for line in lines:
+            if line.startswith("Client Folder:"):
+                info_text += f"📂 Carpeta del cliente:\n{line.split(': ', 1)[1]}\n\n"
+            elif line.startswith("Index File:"):
+                info_text += f"🌐 Archivo principal:\n{line.split(': ', 1)[1]}\n\n"
+            elif line.startswith("Upload Folder:"):
+                info_text += f"📤 Listo para subir:\n{line.split(': ', 1)[1]}\n\n"
+        
+        msg.setInformativeText(info_text.strip())
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg.exec()
     

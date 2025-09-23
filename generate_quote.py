@@ -1,6 +1,7 @@
 import re
 from string import Template
 import os
+import shutil
 
 def select_services():
     print("\n=== Selección de Servicios ===")
@@ -855,7 +856,62 @@ def remove_duplicate_footer(html: str) -> str:
         cleaned = cleaned[:first_html + len("</html>")]
     return cleaned
 
+def sanitize_folder_name(name):
+    """Convert client name to a valid folder name"""
+    # Remove or replace invalid characters for folder names
+    sanitized = re.sub(r'[<>:"/\\|?*]', '', name)
+    sanitized = re.sub(r'\s+', '_', sanitized.strip())
+    return sanitized[:50]  # Limit length to avoid issues
+
+def generate_client_folder_structure(template_path, client_name, variables):
+    """Generate the complete client folder structure with assets"""
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Create sanitized client folder name
+        folder_name = sanitize_folder_name(client_name)
+        if not folder_name:
+            folder_name = "Cliente_Sin_Nombre"
+        
+        # Create paths with cotizaciones folder
+        cotizaciones_folder = os.path.join(current_dir, "cotizaciones")
+        client_folder = os.path.join(cotizaciones_folder, folder_name)
+        to_upload_folder = os.path.join(client_folder, "to_upload")
+        assets_destination = os.path.join(to_upload_folder, "assets")
+        assets_source = os.path.join(current_dir, "assets")
+        
+        # Create directories
+        os.makedirs(to_upload_folder, exist_ok=True)
+        
+        # Copy assets folder
+        if os.path.exists(assets_source):
+            if os.path.exists(assets_destination):
+                shutil.rmtree(assets_destination)
+            shutil.copytree(assets_source, assets_destination)
+        
+        # Generate HTML
+        with open(template_path, 'r', encoding='utf-8') as file:
+            template_content = file.read()
+        
+        template = Template(template_content)
+        filled_template = template.safe_substitute(variables)
+        
+        # Remove duplicated footer blocks if present
+        cleaned_html = remove_duplicate_footer(filled_template)
+        
+        # Save as index.html in to_upload folder
+        index_path = os.path.join(to_upload_folder, "index.html")
+        with open(index_path, 'w', encoding='utf-8') as file:
+            file.write(cleaned_html)
+        
+        return client_folder, index_path
+        
+    except Exception as e:
+        print(f"Error creating client folder structure: {str(e)}")
+        return None, None
+
 def generate_html(template_path, output_path, variables):
+    """Legacy function for backward compatibility"""
     try:
         with open(template_path, 'r', encoding='utf-8') as file:
             template_content = file.read()
@@ -877,16 +933,21 @@ def main():
     # Define paths
     current_dir = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(current_dir, 'template.html')
-    output_path = os.path.join(current_dir, 'cotizacion_generada.html')
     
     # Get user input
     variables = get_user_input()
     
-    # Generate HTML
-    if generate_html(template_path, output_path, variables):
-        print(f"\nCotización generada exitosamente en: {output_path}")
+    # Generate client folder structure
+    client_name = variables.get('company_name', variables.get('client_names', 'Cliente'))
+    client_folder, index_path = generate_client_folder_structure(template_path, client_name, variables)
+    
+    if client_folder and index_path:
+        print(f"\n✅ Cotización generada exitosamente!")
+        print(f"📁 Carpeta del cliente: {client_folder}")
+        print(f"🌐 Archivo principal: {index_path}")
+        print(f"📋 Listo para subir: {os.path.join(client_folder, 'to_upload')}")
     else:
-        print("Error al generar la cotización")
+        print("❌ Error al generar la cotización")
 
 if __name__ == "__main__":
     main()
