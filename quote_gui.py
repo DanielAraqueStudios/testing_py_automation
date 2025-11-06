@@ -1,6 +1,8 @@
 import sys
 import re
 import os
+import subprocess
+import platform
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QGridLayout, QFormLayout, QLabel, 
                              QLineEdit, QCheckBox, QPushButton, QTextEdit, 
@@ -976,20 +978,48 @@ class ModernQuoteApp(QMainWindow):
         msg.setWindowTitle("✅ ¡Cotización Generada Exitosamente!")
         msg.setText("📁 Estructura de carpetas creada correctamente")
         
-        # Parse the result info
+        # Parse the result info and extract folder path
         lines = result_info.split('\n')
         info_text = ""
+        folder_path = None
+        
         for line in lines:
             if line.startswith("Client Folder:"):
-                info_text += f"📂 Carpeta del cliente:\n{line.split(': ', 1)[1]}\n\n"
+                folder_path = line.split(': ', 1)[1].strip()
+                info_text += f"📂 Carpeta del cliente:\n{folder_path}\n\n"
             elif line.startswith("Index File:"):
                 info_text += f"🌐 Archivo principal:\n{line.split(': ', 1)[1]}\n\n"
             elif line.startswith("Upload Folder:"):
-                info_text += f"📤 Listo para subir:\n{line.split(': ', 1)[1]}\n\n"
+                upload_folder = line.split(': ', 1)[1].strip()
+                info_text += f"📤 Listo para subir:\n{upload_folder}\n\n"
         
         msg.setInformativeText(info_text.strip())
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        
+        # Add custom buttons: "Abrir Carpeta" and "OK"
+        open_folder_btn = msg.addButton("📂 Abrir Carpeta", QMessageBox.ButtonRole.ActionRole)
+        ok_btn = msg.addButton("OK", QMessageBox.ButtonRole.AcceptRole)
+        msg.setDefaultButton(ok_btn)
+        
+        # Execute and check which button was clicked
         msg.exec()
+        
+        if msg.clickedButton() == open_folder_btn and folder_path:
+            self.open_folder_in_explorer(folder_path)
+    
+    def open_folder_in_explorer(self, folder_path):
+        """Abre la carpeta en el explorador de archivos del sistema"""
+        try:
+            if platform.system() == 'Windows':
+                # Windows: usar explorer
+                os.startfile(folder_path)
+            elif platform.system() == 'Darwin':
+                # macOS: usar open
+                subprocess.Popen(['open', folder_path])
+            else:
+                # Linux: usar xdg-open
+                subprocess.Popen(['xdg-open', folder_path])
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"No se pudo abrir la carpeta:\n{str(e)}")
     
     def on_generation_error(self, error_message):
         self.progress_bar.setVisible(False)

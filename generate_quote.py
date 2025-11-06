@@ -776,8 +776,118 @@ def get_variables_from_data(data):
           </div>
         </div>
       </section>''' if services['bot'] else '',
-        'facebook_section': '' if not services['facebook'] else '',
-        'ai_section': '' if not services['ai'] else '',
+        'facebook_section': '''<section class="section" id="testimonials">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <div class="center-heading">
+                <h2>Campañas de tráfico <em>
+                    pago para Facebook
+                  </em>
+                  <p>Características de las campañas
+                  </p>
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter left move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>01</h2>
+                  <img src="assets/images/features-icon-1.png" alt="">
+                  <h4>Videos que Conectan y Convierten</h4>
+                  <p>Nuestros videos están diseñados con estrategias efectivas que impulsan a los clientes potenciales a contactarte directamente.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter bottom move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>02</h2>
+                  <img src="assets/images/features-icon-2.png" alt="">
+                  <h4>Inteligencia Artificial al Servicio de tu Marca</h4>
+                  <p>Dos videos al mes, optimizados con estrategias SEO y un diseño de copyright atractivo.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>03</h2>
+                  <img src="assets/images/features-icon-3.png" alt="">
+                  <h4>Segmentación y Resultados Medibles</h4>
+                  <p>Nuestras campañas se segmentan por regiones y se personalizan según las necesidades de tu negocio.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>''' if services['facebook'] else '',
+        'ai_section': '''<section class="section" id="testimonials">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <div class="center-heading">
+                <h2>CAPACITACIÓN EN <em>
+                    INTELIGENCIA ARTIFICIAL
+                  </em>
+                  <p>Características de la capacitación
+                  </p>
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter left move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>01</h2>
+                  <img src="assets/images/features-icon-1.png" alt="">
+                  <h4>Formación Práctica y Aplicada</h4>
+                  <p>Curso completamente enfocado en la práctica, donde cada participante aprenderá haciendo, con casos reales aplicados a su trabajo.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter bottom move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>02</h2>
+                  <img src="assets/images/features-icon-2.png" alt="">
+                  <h4>Herramientas Avanzadas de IA</h4>
+                  <p>Dominio de ChatGPT, GPTs personalizados, Gamma.app para presentaciones y plugins especializados que aumentan la productividad.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12"
+              data-scroll-reveal="enter right move 30px over 0.6s after 0.4s">
+              <div class="features-item">
+                <div class="features-icon">
+                  <h2>03</h2>
+                  <img src="assets/images/features-icon-3.png" alt="">
+                  <h4>Soporte Continuo y Material Completo</h4>
+                  <p>Material de apoyo descargable, grabaciones de todas las sesiones y resolución de dudas en tiempo real durante la capacitación.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>''' if services['ai'] else '',
         
         # Add pricing section content
         'web_pricing': f'''

@@ -3,11 +3,20 @@
 ## 📊 Información de Compilación
 
 ### Detalles del Build
-- **Fecha de compilación:** 22 de Septiembre, 2025 - 11:30 PM
+- **Versión:** 2.1.0
+- **Fecha de compilación:** 5 de Noviembre, 2025
 - **Herramienta:** PyInstaller 6.16.0
 - **Python Version:** 3.13.2
 - **Plataforma objetivo:** Windows 64-bit
 - **Tipo de build:** Release (Producción)
+
+### ✨ Novedades de la Versión 2.1.0
+- ✅ **Botón "Abrir Carpeta"** en mensaje de éxito
+- ✅ **Apertura automática** del explorador de archivos
+- ✅ **Detección multiplataforma** (Windows/Mac/Linux)
+- ✅ **Corrección de bug** en sección de Facebook Campaigns
+- ✅ **Corrección de bug** en sección de Capacitación IA
+- ✅ **Mejor experiencia de usuario** post-generación
 
 ### Especificaciones Técnicas
 - **Ejecutable:** Sistema_Cotizaciones.exe
@@ -25,6 +34,8 @@
 - **datetime:** Procesamiento de fechas y horas
 - **re:** Expresiones regulares
 - **os:** Funciones del sistema operativo
+- **subprocess:** Ejecución de comandos del sistema (NUEVO)
+- **platform:** Detección del sistema operativo (NUEVO)
 
 ### Assets Integrados
 - **template.html:** Plantilla HTML principal

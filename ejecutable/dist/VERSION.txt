@@ -1,0 +1,110 @@
+# Sistema de Cotizaciones Automatizado
+## Versión 2.1.0
+
+### 📅 Información de la Versión
+- **Versión:** 2.1.0
+- **Fecha de lanzamiento:** 5 de Noviembre, 2025
+- **Nombre del código:** "OpenFolder"
+- **Tamaño del ejecutable:** 39,898,781 bytes (~38 MB)
+- **Estado:** Estable - Producción
+
+### ✨ Resumen de Novedades
+
+Esta versión incluye mejoras significativas en la experiencia del usuario y correcciones críticas de bugs que afectaban la visualización de contenido en las cotizaciones.
+
+#### 🎉 Características Nuevas
+1. **Botón "Abrir Carpeta"** - Acceso directo a la carpeta generada
+2. **Compatibilidad Multiplataforma** - Windows, macOS y Linux
+3. **Apertura Automática del Explorador** - Un clic para ver tus archivos
+
+#### 🐛 Bugs Corregidos
+1. **Sección Facebook Campaigns** - Ahora muestra todo el contenido
+2. **Sección Capacitación IA** - Ahora muestra todo el contenido
+
+### 🚀 Mejoras de Rendimiento
+- Sin cambios en el rendimiento (mantiene velocidad de v2.0.0)
+- Carga instantánea de la interfaz
+- Generación de cotizaciones en < 2 segundos
+
+### 📋 Compatibilidad
+- **Sistema Operativo:** Windows 10/11 64-bit
+- **Memoria RAM:** Mínimo 4 GB
+- **Espacio en Disco:** 100 MB + espacio para cotizaciones
+- **Resolución:** 1024x768 mínimo (recomendado 1920x1080)
+
+### 🔄 Actualización desde v2.0.0
+Si tienes la versión 2.0.0:
+1. Elimina el archivo `Sistema_Cotizaciones.exe` antiguo
+2. Copia el nuevo `Sistema_Cotizaciones.exe` (v2.1.0)
+3. Mantén tus cotizaciones existentes (no se borran)
+4. Ejecuta el nuevo archivo
+
+### 📦 Archivos Incluidos
+```
+ejecutable/dist/
+├── Sistema_Cotizaciones.exe           (38 MB) ⭐ EJECUTABLE PRINCIPAL
+├── Ejecutar_Sistema_Cotizaciones.bat  (1 KB)  Atajo de ejecución
+├── README_EJECUTABLE.md               (5 KB)  Manual de usuario
+├── BUILD_INFO.md                      (4 KB)  Información técnica
+├── CHANGELOG.md                       (6 KB)  Historial de cambios
+├── VERSION.txt                        (2 KB)  Este archivo
+├── INSTALACION_PYTHON.md              (8 KB)  Guía de instalación Python
+├── Instalador_Con_Python.bat          (6 KB)  Instalador automático
+└── Instalador_Inteligente.ps1        (11 KB)  Instalador avanzado
+```
+
+### ⚙️ Tecnologías
+- **Python:** 3.13.2
+- **PyQt6:** Framework GUI
+- **PyInstaller:** 6.16.0
+- **Bootstrap:** CSS Framework
+- **jQuery:** JavaScript Library
+
+### 🔐 Seguridad
+- ✅ Sin conexión a internet requerida
+- ✅ Datos procesados localmente
+- ✅ Sin telemetría ni tracking
+- ✅ Código verificado sin malware
+
+### 📞 Soporte
+**Desarrollador:** Daniel Araque Studios  
+**Email:** [Contacto del desarrollador]  
+**Soporte:** [Información de soporte]  
+
+### 🐛 Reportar Bugs
+Si encuentras algún problema:
+1. Ve a CHANGELOG.md para ver si ya fue reportado
+2. Anota la versión (2.1.0) y sistema operativo
+3. Describe los pasos para reproducir el error
+4. Contacta al desarrollador con la información
+
+### 📚 Documentación Adicional
+- **Manual de Usuario:** README_EJECUTABLE.md
+- **Información Técnica:** BUILD_INFO.md
+- **Historial Completo:** CHANGELOG.md
+- **Instalación Python:** INSTALACION_PYTHON.md
+
+### 🎯 Próxima Versión (v2.2.0)
+Características planeadas:
+- Exportación a PDF
+- Plantillas personalizables
+- Historial de cotizaciones
+- Búsqueda de clientes
+
+### ✅ Checklist de Verificación
+- [x] Ejecutable compila sin errores
+- [x] Interfaz gráfica funciona correctamente
+- [x] Generación de cotizaciones exitosa
+- [x] Botón "Abrir Carpeta" funciona
+- [x] Bug de Facebook corregido
+- [x] Bug de IA corregido
+- [x] Documentación actualizada
+- [x] Changelog completo
+- [x] Archivo de versión creado
+
+---
+
+**¡Gracias por usar el Sistema de Cotizaciones Automatizado!**
+
+*Versión 2.1.0 - "OpenFolder" - 5 de Noviembre, 2025*  
+*Daniel Araque Studios - Todos los derechos reservados*
