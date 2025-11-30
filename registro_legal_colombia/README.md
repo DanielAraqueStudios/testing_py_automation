@@ -53,7 +53,7 @@ El Sistema de Cotizaciones Automatizado es una aplicación especializada para:
 
 #### 📅 Información de Registro
 
-- **Fecha de generación:** 22 de September de 2025
+- **Fecha de generación:** 29 de November de 2025
 - **Desarrollador:** Daniel Araque Studios
 - **Propósito:** Registro legal en Colombia
 - **Estado:** Listo para presentación
