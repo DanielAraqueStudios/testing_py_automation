@@ -20,6 +20,8 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
 from datetime import datetime
+import shutil
+import zipfile
 
 def create_legal_registration_folder():
     """Crear la estructura de carpetas para el registro legal"""
@@ -326,6 +328,45 @@ Flujo: Procesar múltiples clientes → Generar estructura organizada
 Resultado: Múltiples carpetas organizadas en /cotizaciones/
     """
     doc.add_paragraph(use_cases)
+    
+    # 8. MARCO LEGAL Y NORMATIVO
+    doc.add_heading('8. MARCO LEGAL Y NORMATIVO', level=1)
+    
+    legal_framework = """
+CUMPLIMIENTO DE REQUISITOS LEGALES EN COLOMBIA
+
+Este software cumple con todos los requisitos establecidos para el registro legal de software en Colombia:
+
+1. PRODUCCIÓN DE SOFTWARE
+   • Código fuente completo en formato comprimido
+   • Algoritmos e instrucciones según el lenguaje de programación (Python)
+   • Manual técnico y programa ejecutable incluidos
+   • Documentación técnica detallada
+
+2. RESOLUCIÓN 00285 DE COLCIENCIAS
+   Expedida el 19 de marzo de 2004
+   
+   El software satisface los criterios establecidos en esta resolución:
+   • Innovación tecnológica en automatización de procesos comerciales
+   • Desarrollo de algoritmos propietarios para cálculo de precios
+   • Implementación de interfaz gráfica moderna
+   • Generación automática de contenido web
+   • Valor agregado en optimización de procesos empresariales
+
+3. REGISTRO DE DERECHOS DE AUTOR
+   • Entidad: Ministerio del Interior - Dirección Nacional de Derechos de Autor
+   • Tipo: Certificado de Registro de Soporte Lógico
+   • Propósito: Protección legal del software desarrollado
+   • Estado: Preparado para solicitud de certificado
+
+DOCUMENTACIÓN INCLUIDA PARA REGISTRO:
+✓ Descripción detallada del programa (este documento)
+✓ Material auxiliar para usuarios
+✓ Código fuente comprimido con algoritmos
+✓ Manuales técnicos y de instalación
+✓ Especificaciones técnicas completas
+    """
+    doc.add_paragraph(legal_framework)
     
     # Footer con información legal
     doc.add_paragraph("\n" * 3)
@@ -681,6 +722,117 @@ Para consultas sobre el registro legal o el software:
     print(f"✅ README creado: {readme_path}")
     return readme_path
 
+def create_source_code_package(docs_folder):
+    """Crear paquete comprimido con código fuente y algoritmos"""
+    print("📦 Creando paquete de código fuente comprimido...")
+    
+    base_path = Path(__file__).parent
+    zip_path = docs_folder / "Codigo_Fuente_Comprimido.zip"
+    
+    # Archivos a incluir en el paquete
+    files_to_include = [
+        'generate_quote.py',
+        'quote_gui.py',
+        'run_gui.py',
+        'template.html',
+        'generar_documentos_legales.py',
+        'README.md'
+    ]
+    
+    # Crear archivo ZIP
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # Agregar archivos Python (código fuente)
+        for filename in files_to_include:
+            file_path = base_path / filename
+            if file_path.exists():
+                zipf.write(file_path, filename)
+                print(f"   ✓ Agregado: {filename}")
+        
+        # Agregar carpeta assets si existe
+        assets_path = base_path / 'assets'
+        if assets_path.exists():
+            for root, dirs, files in os.walk(assets_path):
+                for file in files:
+                    file_path = Path(root) / file
+                    arcname = file_path.relative_to(base_path)
+                    zipf.write(file_path, arcname)
+        
+        # Crear archivo LEEME.txt con instrucciones
+        readme_content = """CÓDIGO FUENTE - Sistema de Cotizaciones Automatizado
+===============================================================
+
+CONTENIDO DEL PAQUETE:
+- generate_quote.py: Lógica principal y algoritmos de generación
+- quote_gui.py: Interfaz gráfica de usuario (PyQt6)
+- run_gui.py: Ejecutable principal
+- template.html: Plantilla HTML base
+- generar_documentos_legales.py: Generador de documentación legal
+- assets/: Recursos web (CSS, JavaScript, imágenes)
+
+LENGUAJE DE PROGRAMACIÓN: Python 3.11+
+
+INSTRUCCIONES DE INSTALACIÓN:
+1. Instalar Python 3.11 o superior
+2. Instalar dependencias: pip install PyQt6 python-docx reportlab
+3. Ejecutar: python run_gui.py
+
+ALGORITMOS PRINCIPALES:
+- Cálculo automático de precios con descuento
+- Generación de estructura de archivos web
+- Procesamiento de templates HTML con sustitución de variables
+- Validación y sanitización de datos de entrada
+
+FRAMEWORK GUI: PyQt6
+COMPATIBILIDAD: Windows, macOS, Linux
+
+REGISTRO LEGAL:
+Este código fuente está incluido en el registro legal del software
+ante el Ministerio del Interior - Dirección Nacional de Derechos de Autor
+según Resolución 00285 de Colciencias (19 de marzo de 2004).
+
+DESARROLLADOR: Daniel Araque Studios
+VERSIÓN: 2.0.0
+FECHA: """ + datetime.now().strftime('%B %Y') + """
+
+"""
+        zipf.writestr('LEEME.txt', readme_content)
+        
+        # Crear archivo con especificaciones técnicas
+        specs_content = """ESPECIFICACIONES TÉCNICAS
+==========================
+
+REQUISITOS DEL SISTEMA:
+- Sistema Operativo: Windows 10+, macOS 10.14+, Linux Ubuntu 18+
+- Python: 3.11 o superior
+- RAM: 4 GB mínimo
+- Espacio en disco: 100 MB + espacio para cotizaciones
+- Resolución: 1024x768 mínimo
+
+DEPENDENCIAS:
+- PyQt6: Framework de interfaz gráfica
+- python-docx: Generación de documentos WORD
+- reportlab: Generación de documentos PDF
+- pathlib: Manejo de rutas de archivos
+- shutil: Operaciones de archivos y carpetas
+
+ARQUITECTURA:
+Patrón MVC (Modelo-Vista-Controlador)
+- Modelo: generate_quote.py
+- Vista: quote_gui.py  
+- Controlador: Coordinación entre módulos
+
+FORMATO DE SALIDA:
+HTML5 + CSS3 + JavaScript (Bootstrap, jQuery)
+
+CODIFICACIÓN: UTF-8
+FORMATO DE NÚMEROS: Separadores de miles colombianos
+
+"""
+        zipf.writestr('ESPECIFICACIONES_TECNICAS.txt', specs_content)
+    
+    print(f"✅ Paquete de código fuente creado: {zip_path}")
+    return zip_path
+
 def main():
     """Función principal para generar todos los documentos legales"""
     print("🚀 Iniciando generación de documentos para registro legal...")
@@ -693,6 +845,7 @@ def main():
         # Generar documentos
         word_doc = create_program_description_word(docs_folder)
         pdf_doc = create_auxiliary_material_pdf(docs_folder)
+        source_code_zip = create_source_code_package(docs_folder)
         readme_doc = create_readme_file(legal_folder)
         
         # Resumen final
@@ -702,12 +855,20 @@ def main():
         print(f"📁 Carpeta principal: {legal_folder}")
         print(f"📄 Descripción WORD: {word_doc.name}")
         print(f"📄 Material auxiliar PDF: {pdf_doc.name}")
+        print(f"📦 Código fuente ZIP: {source_code_zip.name}")
         print(f"📄 README: {readme_doc.name}")
+        print("\n⚖️  CUMPLIMIENTO LEGAL:")
+        print("   ✓ Resolución 00285 de Colciencias (19 de marzo de 2004)")
+        print("   ✓ Código fuente comprimido con algoritmos")
+        print("   ✓ Manual técnico y documentación auxiliar")
+        print("   ✓ Listo para Certificado del Ministerio del Interior")
         print("\n🎯 Los documentos están listos para el registro legal del software en Colombia")
         print("📋 Revise los archivos generados antes de presentarlos")
         
     except Exception as e:
         print(f"❌ Error al generar documentos: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
     
     return True
