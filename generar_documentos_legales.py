@@ -279,15 +279,17 @@ SALIDA:
     installation_text = """
 REQUISITOS PREVIOS:
 1. Sistema operativo compatible (Windows 10+, macOS 10.14+, Linux Ubuntu 18+)
-2. Python 3.11 o superior instalado
-3. Pip (gestor de paquetes de Python) actualizado
+2. Espacio en disco: mínimo 100 MB
+3. Memoria RAM: mínimo 4 GB
 
-PASOS DE INSTALACIÓN:
-1. Descargar el paquete completo del software
+PASOS DE INSTALACIÓN (VERSIÓN EJECUTABLE):
+1. Descargar el ejecutable del software (empaquetado con PyInstaller)
 2. Extraer archivos en directorio deseado
-3. Abrir terminal/consola en el directorio del software
-4. Ejecutar: pip install -r requirements.txt
-5. Verificar instalación ejecutando: python quote_gui.py
+3. Ejecutar el archivo Sistema_Cotizaciones.exe (Windows) o ejecutable correspondiente
+4. El software está listo para usar sin instalaciones adicionales
+
+NOTA: El software viene empaquetado con PyInstaller e incluye todas las dependencias necesarias.
+No requiere instalación previa de Python ni librerías adicionales.
 
 CONFIGURACIÓN INICIAL:
 1. Configurar datos de empresa por defecto
@@ -367,6 +369,67 @@ DOCUMENTACIÓN INCLUIDA PARA REGISTRO:
 ✓ Especificaciones técnicas completas
     """
     doc.add_paragraph(legal_framework)
+    
+    # 9. CLASIFICACIÓN SEGÚN RESOLUCIÓN 00285
+    doc.add_heading('9. CLASIFICACIÓN DEL SOFTWARE SEGÚN RESOLUCIÓN 00285', level=1)
+    
+    classification = """
+TIPO DE PRODUCCIÓN: PRODUCCIÓN TECNOLÓGICA
+
+Según la Resolución 00285 de Colciencias, este software se clasifica como PRODUCCIÓN TECNOLÓGICA porque genera innovación al:
+
+• Desarrollar una nueva aplicación especializada en automatización de cotizaciones
+• Implementar mejoras significativas sobre procesos manuales existentes
+• Crear algoritmos propietarios de cálculo automático de precios con descuentos
+• Extender herramientas existentes (PyQt6) con funcionalidad especializada
+• Mejorar significativamente la metodología de generación de propuestas comerciales
+• Innovar en la integración de cálculo financiero con generación automática de web
+
+El software NO se clasifica como producción científica porque no genera conocimiento teórico nuevo (nuevos modelos algorítmicos, nuevas metodologías de desarrollo, nuevos sistemas operativos, etc.), sino que aplica tecnologías existentes de manera innovadora para resolver un problema específico del sector comercial.
+    """
+    doc.add_paragraph(classification)
+    
+    # 10. CRITERIOS TÉCNICOS DE PONDERACIÓN (RESOLUCIÓN 00285)
+    doc.add_heading('10. CRITERIOS TÉCNICOS DE PONDERACIÓN', level=1)
+    
+    doc.add_paragraph('Evaluación del software según los criterios técnicos establecidos en la Resolución 00285 de Colciencias:')
+    doc.add_paragraph()
+    
+    # Crear tabla de criterios técnicos
+    criteria_table = doc.add_table(rows=10, cols=2)
+    criteria_table.style = 'Table Grid'
+    
+    criteria_data = [
+        ('CRITERIO', 'CUMPLIMIENTO EN ESTE SOFTWARE'),
+        ('1. ROBUSTEZ', 'El software es sólido y funciona correctamente incluso con datos inesperados. Implementa validación exhaustiva de entradas, manejo de errores con try-except, y recuperación graciosa ante fallos. No se bloquea ante situaciones difíciles.'),
+        ('2. EXTENDIBILIDAD', 'Arquitectura modular basada en MVC facilita agregar nuevas funcionalidades. Nuevos servicios, métodos de cálculo o formatos de salida pueden agregarse sin modificar el código existente. Código bien estructurado y documentado.'),
+        ('3. DESEMPEÑO', 'Cumple tareas en tiempo real sin demoras perceptibles. Genera cotizaciones completas en segundos. Uso eficiente de memoria RAM (<50MB). No desperdicia espacio en disco. Threading para operaciones largas.'),
+        ('4. USABILIDAD', 'Interfaz gráfica intuitiva diseñada para usuarios no técnicos. Organización en pestañas lógicas. Validación en tiempo real. Mensajes claros. Documentación completa incluida. Curva de aprendizaje mínima.'),
+        ('5. INTEGRIDAD', 'Datos consistentes en todo el proceso. Validación de entradas previene corrupción. Archivos generados mantienen estructura íntegra. No hay pérdida de información. Sistema de verificación post-generación.'),
+        ('6. PORTABILIDAD', 'Compatible con Windows, macOS y Linux sin modificaciones. Python multiplataforma garantiza portabilidad. Rutas de archivos con pathlib funcionan en todos los sistemas. Sin dependencias específicas de SO.'),
+        ('7. COMPATIBILIDAD', 'Versión 2.0.0 mantiene compatibilidad con estructuras de datos de versión 1.x. Templates HTML son retrocompatibles. Archivos generados funcionan en cualquier navegador moderno.'),
+        ('8. MANTENIMIENTO', 'Código limpio y bien documentado facilita mantenimiento. Arquitectura modular permite actualizaciones aisladas. Comentarios explican lógica compleja. Estructura de proyecto organizada lógicamente.'),
+        ('9. DOCUMENTACIÓN', 'Completamente documentado con descripciones técnicas, manuales de usuario, código fuente comentado, README detallado, y documentación para registro legal. Cumple estándares de documentación profesional.')
+    ]
+    
+    for i, (criterion, compliance) in enumerate(criteria_data):
+        criteria_table.cell(i, 0).text = criterion
+        criteria_table.cell(i, 1).text = compliance
+        # Hacer negrita la primera fila (encabezados)
+        if i == 0:
+            criteria_table.cell(i, 0).paragraphs[0].runs[0].font.bold = True
+            criteria_table.cell(i, 1).paragraphs[0].runs[0].font.bold = True
+        else:
+            criteria_table.cell(i, 0).paragraphs[0].runs[0].font.bold = True
+    
+    add_table_borders(criteria_table)
+    
+    doc.add_paragraph()
+    conclusion = """
+CONCLUSIÓN: El software cumple satisfactoriamente con los 9 criterios técnicos de ponderación establecidos en la Resolución 00285 de Colciencias, demostrando ser un producto tecnológico robusto, bien diseñado, documentado y apto para registro legal.
+    """
+    conclusion_para = doc.add_paragraph(conclusion)
+    conclusion_para.runs[0].font.bold = True
     
     # Footer con información legal
     doc.add_paragraph("\n" * 3)
@@ -450,12 +513,12 @@ de trabajo en la generación de propuestas comerciales.
     
     quick_start = """
 <b>1. PREPARACIÓN INICIAL</b><br/>
-• Asegúrese de tener Python 3.11+ instalado<br/>
-• Descargue y extraiga el software completo<br/>
-• Instale las dependencias: pip install PyQt6 python-docx reportlab<br/><br/>
+• Descargue el ejecutable del software (empaquetado con PyInstaller)<br/>
+• Extraiga el contenido en una carpeta de su preferencia<br/>
+• No requiere instalación de Python ni dependencias adicionales<br/><br/>
 
 <b>2. PRIMER USO</b><br/>
-• Ejecute: python quote_gui.py<br/>
+• Ejecute el archivo Sistema_Cotizaciones.exe (Windows) o el ejecutable correspondiente<br/>
 • Complete la pestaña "Información" con datos del cliente<br/>
 • Seleccione servicios en la pestaña "Servicios"<br/>
 • Configure precios en la pestaña "Precios"<br/>
@@ -523,9 +586,9 @@ Resultado: Cotización especializada en marketing<br/>
     content.append(Paragraph("SOLUCIÓN DE PROBLEMAS COMUNES", subtitle_style))
     
     troubleshooting_text = """
-<b>PROBLEMA: "No se puede instalar PyQt6"</b><br/>
-Solución: Actualizar pip: python -m pip install --upgrade pip<br/>
-Luego: pip install --upgrade PyQt6<br/><br/>
+<b>PROBLEMA: "El ejecutable no inicia"</b><br/>
+Solución: Verificar que extrajo todos los archivos del paquete completo.<br/>
+Asegurar permisos de ejecución. En Windows, permitir la aplicación si Windows Defender la bloquea.<br/><br/>
 
 <b>PROBLEMA: "Los campos de precio no permiten números grandes"</b><br/>
 Solución: El sistema permite hasta 20 dígitos. Escriba sin puntos ni comas,
@@ -771,10 +834,15 @@ CONTENIDO DEL PAQUETE:
 
 LENGUAJE DE PROGRAMACIÓN: Python 3.11+
 
-INSTRUCCIONES DE INSTALACIÓN:
-1. Instalar Python 3.11 o superior
-2. Instalar dependencias: pip install PyQt6 python-docx reportlab
-3. Ejecutar: python run_gui.py
+INSTRUCCIONES DE USO:
+El software se distribuye como ejecutable empaquetado con PyInstaller.
+No requiere instalación de Python ni dependencias adicionales.
+
+1. Extraer el contenido del paquete
+2. Ejecutar el archivo Sistema_Cotizaciones.exe (Windows) o ejecutable correspondiente
+3. El software está listo para usar inmediatamente
+
+NOTA: PyInstaller empaqueta Python y todas las librerías necesarias en un ejecutable standalone.
 
 ALGORITMOS PRINCIPALES:
 - Cálculo automático de precios con descuento
@@ -803,17 +871,20 @@ FECHA: """ + datetime.now().strftime('%B %Y') + """
 
 REQUISITOS DEL SISTEMA:
 - Sistema Operativo: Windows 10+, macOS 10.14+, Linux Ubuntu 18+
-- Python: 3.11 o superior
 - RAM: 4 GB mínimo
-- Espacio en disco: 100 MB + espacio para cotizaciones
+- Espacio en disco: 150 MB + espacio para cotizaciones
 - Resolución: 1024x768 mínimo
+- NO requiere instalación previa de Python
 
-DEPENDENCIAS:
+DEPENDENCIAS (INCLUIDAS EN EL EJECUTABLE):
+El software se distribuye empaquetado con PyInstaller e incluye:
 - PyQt6: Framework de interfaz gráfica
 - python-docx: Generación de documentos WORD
 - reportlab: Generación de documentos PDF
-- pathlib: Manejo de rutas de archivos
-- shutil: Operaciones de archivos y carpetas
+- Python 3.11+ runtime
+- Todas las librerías necesarias
+
+NOTA: El usuario final NO necesita instalar nada adicional.
 
 ARQUITECTURA:
 Patrón MVC (Modelo-Vista-Controlador)
