@@ -1,0 +1,12 @@
+# Ruflo / Claude Code tooling — local only, never committed
+.env
+.env.local
+.env.*.local
+.claude/
+.claude-flow/
+.swarm/
+CLAUDE.md
+
+# Python
+__pycache__/
+*.pyc
