@@ -1,125 +1,49 @@
-# Sistema de Cotizaciones - Guía de Usuario
+# Sistema de Cotizaciones — Platform
 
-## 🚀 Descripción
+This repository is transitioning from a single Python desktop quote-generator into a multi-service
+SaaS ecosystem (marketing site, client portal, CRM, campaigns, quotes, ingestion, notifications, a
+shared datawarehouse, and an n8n-driven AI assistant).
 
-Sistema profesional para generar cotizaciones HTML personalizadas con dos interfaces disponibles:
+**Start here:** [`ARCHITECTURE.md`](./ARCHITECTURE.md) — the full target architecture, service
+inventory, data flow, security model, and phased build order.
 
-1. **Versión Consola** - `generate_quote.py` (Original)
-2. **Versión GUI Moderna** - `quote_gui.py` (Nueva interfaz gráfica)
+## Repository layout
 
-## 📋 Servicios Disponibles
-
-- 🌐 **Desarrollo Web**: Página web ecommerce completa
-- 📱 **Redes Sociales**: Estrategia integral de redes sociales
-- 🤖 **Bot de WhatsApp**: Automatización inteligente 24/7
-- 📢 **Campañas Facebook**: Publicidad pagada y estrategias
-- 🧠 **Capacitación IA**: Formación en herramientas de IA
-
-## 🖥️ Interfaz Gráfica (GUI) - RECOMENDADO
-
-### Características
-- ✨ Diseño moderno con tema oscuro
-- 📑 Interfaz por pestañas organizadas
-- ⚡ Validación en tiempo real de precios
-- 🎯 Vista previa de cotizaciones
-- 📊 Barra de progreso para generación
-- 🔄 Threading para mejor rendimiento
-
-### Uso
-```bash
-# Ejecutar la interfaz gráfica
-python quote_gui.py
-
-# O usar el launcher
-python run_gui.py
+```
+apps/       # Independently deployable services (Angular/NestJS) — see apps/README.md
+libs/       # Shared Nx libraries (contracts, auth, ui) — see libs/README.md
+warehouse/  # Analytical Postgres datawarehouse — see warehouse/README.md
+legacy/     # The original Python desktop tool + legal/registration docs + research poster
+ARCHITECTURE.md   # Full platform architecture (read this first)
+CLAUDE.md         # Ruflo / Claude Code project configuration
 ```
 
-### Flujo de Trabajo
-1. **Información** - Complete datos del cliente y empresa
-2. **Servicios** - Seleccione los servicios a incluir
-3. **Precios** - Configure precios originales y con descuento
-4. **Generar** - Cree la cotización HTML
+## Status
 
-## 🖥️ Interfaz de Consola (Original)
+- `apps/`, `libs/`, `warehouse/` — **scaffolding only**, not yet implemented. See each folder's
+  README and `ARCHITECTURE.md` section 7 ("Build order") for what comes first.
+- `legacy/` — the current, working Python system. Still functional as-is; see
+  [`legacy/README_quote_generator.md`](./legacy/README_quote_generator.md) for how to run it.
 
-### Uso
-```bash
-python generate_quote.py
-```
+## What's in `legacy/`
 
-### Flujo de Trabajo
-1. Ingrese información del cliente
-2. Seleccione servicios (s/n)
-3. Configure precios para servicios seleccionados
-4. Defina términos de la oferta
-5. La cotización se genera automáticamente
+The pre-refactor codebase, preserved rather than deleted:
 
-## 📁 Archivos del Sistema
+- `generate_quote.py`, `quote_gui.py`, `run_gui.py`, `test_gui.py` — the Python/PyQt6 quote
+  generator (console + GUI).
+- `template.html`, `index.html`, `ORIGINAL ONE.html`, `assets/` — the HTML quote template and its
+  static assets.
+- `cotizaciones/` — generated per-client quote output from past runs.
+- `ejecutable/`, `ejecutable.rar` — the packaged Windows executable/installer.
+- `generar_documentos_legales.py`, `registro_legal_colombia/` — Colombian software
+  legal-registration document generator and its output (unrelated to the quoting product itself).
+- `semillero_investigacion/` — academic research poster material (REDCOLSI/UMNG), documenting this
+  project for a university research showcase.
 
-- `generate_quote.py` - Versión consola original
-- `quote_gui.py` - Interfaz gráfica moderna
-- `run_gui.py` - Launcher para la GUI
-- `template.html` - Plantilla HTML base
-- `cotizacion_generada.html` - Archivo de salida
-- `README.md` - Esta guía
+Nothing in `legacy/` is deleted or modified as part of the platform refactor — it's kept as
+reference material and as the functional baseline the new `quotes-service` (Phase 1) is ported from.
 
-## 🛠️ Requisitos
+## Next steps
 
-```bash
-pip install PyQt6
-```
-
-## 🎨 Características de la GUI
-
-### Diseño Visual
-- **Tema Oscuro Profesional**: Colores #2c3e50, #34495e, #3498db
-- **Tipografía Moderna**: Fuentes optimizadas para lectura
-- **Iconos Intuitivos**: Emojis para mejor identificación
-- **Animaciones Suaves**: Transiciones y hover effects
-
-### Validación de Datos
-- ✅ Campos obligatorios marcados
-- ✅ Formato de precios automático (1.234.567)
-- ✅ Validación de servicios seleccionados
-- ✅ Mensajes de error descriptivos
-
-### Experiencia de Usuario
-- 🎯 Navegación por pestañas
-- 🔄 Habilitación/deshabilitación dinámica
-- 📊 Progreso visual de generación
-- 👁️ Vista previa antes de generar
-- 💾 Generación en hilo separado (no bloquea UI)
-
-## 🚀 Ventajas de la GUI vs Consola
-
-| Característica | GUI | Consola |
-|---------------|-----|---------|
-| Usabilidad | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Validación | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| Diseño Visual | ⭐⭐⭐⭐⭐ | ⭐ |
-| Eficiencia | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Facilidad | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-
-## 🔧 Solución de Problemas
-
-### Error de PyQt6
-```bash
-pip install --upgrade pip
-pip install PyQt6
-```
-
-### Error de Template
-- Verifique que `template.html` existe
-- Revise permisos de escritura
-
-### Error de Generación
-- Complete todos los campos obligatorios
-- Seleccione al menos un servicio
-- Verifique formato de precios
-
-## 📞 Soporte
-
-Para problemas técnicos o mejoras, contacte al desarrollador.
-
----
-*Sistema desarrollado con PyQt6 y Python - Interfaz moderna para generación profesional de cotizaciones*
+See `ARCHITECTURE.md` section 7 for the phased build order. Phase 0/1 (Nx workspace skeleton,
+`api-gateway`, `quotes-service`, `client-portal`) has not started yet.
