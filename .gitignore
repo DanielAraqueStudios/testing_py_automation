@@ -10,3 +10,13 @@ CLAUDE.md
 # Python
 __pycache__/
 *.pyc
+
+# Node / Nx workspace
+node_modules/
+dist/
+tmp/
+.nx/cache/
+.nx/workspace-data/
+
+# Academic / research material — kept locally, not tracked in git
+legacy/semillero_investigacion/
